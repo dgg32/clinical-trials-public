@@ -1,0 +1,12 @@
+http://snomedin5minutes.org/
+
+get the conceptid
+curl --silent "https://browser.ihtsdotools.org/snowstorm/snomed-ct/browser/MAIN/descriptions?&limit=50&term=breast%20cancer&conceptActive=true&lang=english&skipTo=0&returnLimit=3"
+
+curl --silent "https://browser.ihtsdotools.org/snowstorm/snomed-ct/browser/MAIN/concepts?&limit=50&term=breast%20cancer&conceptActive=true&lang=english&skipTo=0&returnLimit=3"
+
+
+get the ontology
+curl --silent "https://browser.ihtsdotools.org/snowstorm/snomed-ct/browser/MAIN/2019-07-31/concepts/254837009" > /Users/dgg32/Downloads/breast_cancer_2.json
+
+get the relationships and add them to the graph

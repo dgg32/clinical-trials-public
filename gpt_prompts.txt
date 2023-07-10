@@ -1,0 +1,5 @@
+You have a list [Airline, Consortium, Corporation, EducationalOrganization, FundingScheme, GovernmentOrganization, LibrarySystem, LocalBusiness, MedicalOrganization, NGO, NewsMediaOrganization, OnlineBusiness, PerformingGroup, Project, ResearchOrganization, SearchRescueOrganization, SportsOrganization, WorkersUnion], to which does "Dana-Farber Cancer Institute" belong? Choose your answer from the list and show the answer only.
+
+You have a list [Airline, Consortium, Corporation, EducationalOrganization, FundingScheme, GovernmentOrganization, LibrarySystem, LocalBusiness, MedicalOrganization, NGO, NewsMediaOrganization, OnlineBusiness, PerformingGroup, Project, ResearchOrganization, SearchRescueOrganization, SportsOrganization, WorkersUnion], to which does "Bristol-Myers Squibb" belong? Choose your answer from the list and show the answer only.
+
+You have a list [], to which does "Bristol-Myers Squibb" belong? Choose your answer from the list and show the answer only.

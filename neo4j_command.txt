@@ -1,0 +1,38 @@
+CREATE CONSTRAINT IF NOT EXISTS FOR (c:Category) REQUIRE c.SNOMEDCT IS UNIQUE
+;
+CREATE CONSTRAINT IF NOT EXISTS FOR (c:Condition) REQUIRE c.SNOMEDCT IS UNIQUE
+;
+CREATE CONSTRAINT IF NOT EXISTS FOR (i:Institution) REQUIRE i.name IS UNIQUE
+;
+CREATE CONSTRAINT IF NOT EXISTS FOR (m:Morphology) REQUIRE m.SNOMEDCT IS UNIQUE
+;
+CREATE CONSTRAINT IF NOT EXISTS FOR (s:Site) REQUIRE s.SNOMEDCT IS UNIQUE
+;
+CREATE CONSTRAINT IF NOT EXISTS FOR (t:Trial) REQUIRE t.NCT IS UNIQUE
+;
+LOAD CSV WITH HEADERS FROM 'file:///node_category.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Category {SNOMEDCT: row.SNOMEDCT, name: coalesce(row.name, ""), fsn: coalesce(row.fsn, "")})
+;
+LOAD CSV WITH HEADERS FROM 'file:///node_condition.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Condition {SNOMEDCT: row.SNOMEDCT, name: coalesce(row.name, ""), UMLS: coalesce(row.UMLS, "")})
+;
+LOAD CSV WITH HEADERS FROM 'file:///node_institution.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Institution {name: row.name, type: coalesce(row.type, "")})
+;
+LOAD CSV WITH HEADERS FROM 'file:///node_morphology.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Morphology {SNOMEDCT: row.SNOMEDCT, name: coalesce(row.name, ""), fsn: coalesce(row.fsn, "")})
+;
+LOAD CSV WITH HEADERS FROM 'file:///node_site.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Site {SNOMEDCT: row.SNOMEDCT, name: coalesce(row.name, ""), fsn: coalesce(row.fsn, "")})
+;
+LOAD CSV WITH HEADERS FROM 'file:///node_trial.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Trial {NCT: row.NCT, title: coalesce(row.title, ""), status: coalesce(row.status, ""), study_results: coalesce(row.study_results, ""), study_type: coalesce(row.study_type, ""), start_date: coalesce(row.start_date, ""), min_age: coalesce(row.min_age, 0), max_age: coalesce(row.max_age, 0), gender: coalesce(row.gender, ""), criteria: coalesce(row.criteria, ""), healthy_volunteers: coalesce(row.healthy_volunteers, ""), sampling_method: coalesce(row.sampling_method, ""), locations: split(coalesce(row.locations, ''), '|'), phases: split(coalesce(row.phases, ''), '|'), enrollment: coalesce(row.enrollment, 0), description: coalesce(row.description, ""), url: coalesce(row.url, ""), outcome_measures: split(coalesce(row.outcome_measures, ''), '|') })
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_condition_category.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Condition {SNOMEDCT: row.from}) MERGE (p2:Category {SNOMEDCT: row.to}) MERGE (p1)-[r:BELONGS_TO]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_category_category.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Category {SNOMEDCT: row.from}) MERGE (p2:Category {SNOMEDCT: row.to}) MERGE (p1)-[r:IS_A_CATEGORY]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_condition_morphology.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Condition {SNOMEDCT: row.from}) MERGE (p2:Morphology {SNOMEDCT: row.to}) MERGE (p1)-[r:HAS_MORPHOLOGY]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_condition_site.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Condition {SNOMEDCT: row.from}) MERGE (p2:Site {SNOMEDCT: row.to}) MERGE (p1)-[r:IS_FOUND_AT_SITE]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_site_site.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Site {SNOMEDCT: row.from}) MERGE (p2:Site {SNOMEDCT: row.to}) MERGE (p1)-[r:IS_A_SITE]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_trial_condition.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Trial {NCT: row.from}) MERGE (p2:Condition {SNOMEDCT: row.to}) MERGE (p1)-[r:FOCUSES_ON]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_trial_institution.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Trial {NCT: row.from}) MERGE (p2:Institution {name: row.to}) MERGE (p1)-[r:BY]->(p2)
+;

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow>
+  <name>neo4j_test</name>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description/>
+  <extended_description/>
+  <workflow_version/>
+  <created_user>-</created_user>
+  <created_date>2023/07/03 16:26:27.637</created_date>
+  <modified_user>-</modified_user>
+  <modified_date>2023/07/03 16:26:27.637</modified_date>
+  <parameters>
+    </parameters>
+  <actions>
+    <action>
+      <name>Check Neo4j Connections</name>
+      <description/>
+      <type>NEO4J_CHECK_CONNECTIONS</type>
+      <attributes/>
+      <connections>
+        <connection>hop_connect</connection>
+      </connections>
+      <parallel>Y</parallel>
+      <xloc>320</xloc>
+      <yloc>48</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>Copy files</name>
+      <description/>
+      <type>COPY_FILES</type>
+      <attributes/>
+      <copy_empty_folders>Y</copy_empty_folders>
+      <arg_from_previous>N</arg_from_previous>
+      <overwrite_files>N</overwrite_files>
+      <include_subfolders>N</include_subfolders>
+      <remove_source_files>N</remove_source_files>
+      <add_result_filesname>N</add_result_filesname>
+      <destination_is_a_file>N</destination_is_a_file>
+      <create_destination_folder>N</create_destination_folder>
+      <fields>
+        <field>
+          <source_filefolder>EMPTY_SOURCE_URL-0-C:\Users\dgg32\Documents\clinicaltrials\for_neo4j\</source_filefolder>
+          <source_configuration_name>LOCAL-SOURCE-FILE-0</source_configuration_name>
+          <destination_filefolder>EMPTY_DEST_URL-0-C:\Users\dgg32\.Neo4jDesktop\relate-data\dbmss\${neo4j_project_folder_name}\import</destination_filefolder>
+          <destination_configuration_name>LOCAL-DEST-FILE-0</destination_configuration_name>
+          <wildcard>.*\.tsv</wildcard>
+        </field>
+      </fields>
+      <parallel>Y</parallel>
+      <xloc>480</xloc>
+      <yloc>48</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>Set neo4j db name</name>
+      <description/>
+      <type>SET_VARIABLES</type>
+      <attributes/>
+      <fields>
+        <field>
+          <variable_name>neo4j_project_folder_name</variable_name>
+          <variable_type>JVM</variable_type>
+          <variable_value>dbms-4aad39fe-db77-4b27-8bfe-b3e8fa3cf873</variable_value>
+        </field>
+      </fields>
+      <file_variable_type>CURRENT_WORKFLOW</file_variable_type>
+      <replacevars>Y</replacevars>
+      <parallel>N</parallel>
+      <xloc>160</xloc>
+      <yloc>48</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>Start</name>
+      <description/>
+      <type>SPECIAL</type>
+      <attributes/>
+      <DayOfMonth>1</DayOfMonth>
+      <hour>12</hour>
+      <intervalMinutes>60</intervalMinutes>
+      <intervalSeconds>0</intervalSeconds>
+      <minutes>0</minutes>
+      <repeat>N</repeat>
+      <schedulerType>0</schedulerType>
+      <weekDay>1</weekDay>
+      <parallel>N</parallel>
+      <xloc>16</xloc>
+      <yloc>48</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>Neo4j Cypher Script-Constraints</name>
+      <description/>
+      <type>NEO4J_CYPHER_SCRIPT</type>
+      <attributes/>
+      <connection>hop_connect</connection>
+      <replace_variables>N</replace_variables>
+      <script>CREATE CONSTRAINT IF NOT EXISTS FOR (c:Category) REQUIRE c.SNOMEDCT IS UNIQUE
+;
+CREATE CONSTRAINT IF NOT EXISTS FOR (c:Condition) REQUIRE c.SNOMEDCT IS UNIQUE
+;
+CREATE CONSTRAINT IF NOT EXISTS FOR (i:Institution) REQUIRE i.name IS UNIQUE
+;
+CREATE CONSTRAINT IF NOT EXISTS FOR (m:Morphology) REQUIRE m.SNOMEDCT IS UNIQUE
+;
+CREATE CONSTRAINT IF NOT EXISTS FOR (s:Site) REQUIRE s.SNOMEDCT IS UNIQUE
+;
+CREATE CONSTRAINT IF NOT EXISTS FOR (t:Trial) REQUIRE t.NCT IS UNIQUE
+;</script>
+      <parallel>N</parallel>
+      <xloc>688</xloc>
+      <yloc>48</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>Neo4j Cypher Script-Nodes and Relations</name>
+      <description/>
+      <type>NEO4J_CYPHER_SCRIPT</type>
+      <attributes/>
+      <connection>hop_connect</connection>
+      <replace_variables>N</replace_variables>
+      <script>LOAD CSV WITH HEADERS FROM 'file:///node_category.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Category {SNOMEDCT: row.SNOMEDCT, name: coalesce(row.name, ""), fsn: coalesce(row.fsn, "")})
+;
+LOAD CSV WITH HEADERS FROM 'file:///node_condition.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Condition {SNOMEDCT: row.SNOMEDCT, name: coalesce(row.name, ""), UMLS: coalesce(row.UMLS, "")})
+;
+LOAD CSV WITH HEADERS FROM 'file:///node_institution.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Institution {name: row.name, type: coalesce(row.type, "")})
+;
+LOAD CSV WITH HEADERS FROM 'file:///node_morphology.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Morphology {SNOMEDCT: row.SNOMEDCT, name: coalesce(row.name, ""), fsn: coalesce(row.fsn, "")})
+;
+LOAD CSV WITH HEADERS FROM 'file:///node_site.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Site {SNOMEDCT: row.SNOMEDCT, name: coalesce(row.name, ""), fsn: coalesce(row.fsn, "")})
+;
+LOAD CSV WITH HEADERS FROM 'file:///node_trial.tsv' AS row FIELDTERMINATOR '\t' MERGE (c:Trial {NCT: row.NCT, title: coalesce(row.title, ""), status: coalesce(row.status, ""), study_results: coalesce(row.study_results, ""), study_type: coalesce(row.study_type, ""), start_date: coalesce(row.start_date, ""), min_age: coalesce(row.min_age, 0), max_age: coalesce(row.max_age, 0), gender: coalesce(row.gender, ""), criteria: coalesce(row.criteria, ""), healthy_volunteers: coalesce(row.healthy_volunteers, ""), sampling_method: coalesce(row.sampling_method, ""), locations: split(coalesce(row.locations, ''), '|'), phases: split(coalesce(row.phases, ''), '|'), enrollment: coalesce(row.enrollment, 0), description: coalesce(row.description, ""), url: coalesce(row.url, ""), outcome_measures: split(coalesce(row.outcome_measures, ''), '|') })
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_condition_category.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Condition {SNOMEDCT: row.from}) MERGE (p2:Category {SNOMEDCT: row.to}) MERGE (p1)-[r:BELONGS_TO]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_category_category.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Category {SNOMEDCT: row.from}) MERGE (p2:Category {SNOMEDCT: row.to}) MERGE (p1)-[r:IS_A_CATEGORY]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_condition_morphology.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Condition {SNOMEDCT: row.from}) MERGE (p2:Morphology {SNOMEDCT: row.to}) MERGE (p1)-[r:HAS_MORPHOLOGY]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_condition_site.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Condition {SNOMEDCT: row.from}) MERGE (p2:Site {SNOMEDCT: row.to}) MERGE (p1)-[r:IS_FOUND_AT_SITE]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_site_site.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Site {SNOMEDCT: row.from}) MERGE (p2:Site {SNOMEDCT: row.to}) MERGE (p1)-[r:IS_A_SITE]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_trial_condition.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Trial {NCT: row.from}) MERGE (p2:Condition {SNOMEDCT: row.to}) MERGE (p1)-[r:FOCUSES_ON]->(p2)
+;
+LOAD CSV WITH HEADERS FROM 'file:///edge_trial_institution.tsv' AS row FIELDTERMINATOR '\t' MERGE (p1:Trial {NCT: row.from}) MERGE (p2:Institution {name: row.to}) MERGE (p1)-[r:BY]->(p2)
+;</script>
+      <parallel>N</parallel>
+      <xloc>896</xloc>
+      <yloc>48</yloc>
+      <attributes_hac/>
+    </action>
+  </actions>
+  <hops>
+    <hop>
+      <from>Set neo4j db name</from>
+      <to>Check Neo4j Connections</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>Check Neo4j Connections</from>
+      <to>Copy files</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>Start</from>
+      <to>Set neo4j db name</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
+    </hop>
+    <hop>
+      <from>Copy files</from>
+      <to>Neo4j Cypher Script-Constraints</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>Neo4j Cypher Script-Constraints</from>
+      <to>Neo4j Cypher Script-Nodes and Relations</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+  </hops>
+  <notepads>
+  </notepads>
+  <attributes/>
+</workflow>
